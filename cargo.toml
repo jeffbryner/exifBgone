@@ -1,0 +1,9 @@
+[package]
+name = "exifBgone"
+version = "0.1.0"
+authors = ["Jeff Bryner"]
+edition = "2018"
+
+[dependencies]
+structopt = "0.2"
+rexiv2 = "0.9.1"
