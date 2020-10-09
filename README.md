@@ -1,6 +1,8 @@
 # exifBgone
 obliterate pesky EXIF data for OSINT cleanliness
 
+## why?
+a 'Jeff learns rust' project
 
 # Installing
 Requires gexiv2
