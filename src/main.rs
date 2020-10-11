@@ -30,25 +30,26 @@ fn process_file(filename: &str) -> Result<String, std::io::Error> {
             if exif_metadata.supports_iptc() && exif_metadata.has_iptc() {
                 exif.push_str("IPTC ");
             }
+            if exif_metadata.supports_xmp() && exif_metadata.has_xmp() {
+                exif.push_str("XMP ");
+            }
             match exif_metadata.get_gps_info() {
                 Some(_) => exif.push_str("GPS "),
                 None => {}
             };
         }
         Err(exif_error) => match exif_error {
-            rexiv2::Rexiv2Error::NoValue => println!("No value found"),
-            rexiv2::Rexiv2Error::Utf8(ref err) => println!("IO error: {:}", err),
             rexiv2::Rexiv2Error::Internal(Some(ref msg)) => {
                 if msg.contains("The file contains data of an unknown image type") {
                     {}
                 } else {
-                    println!("internal--> {:}", msg);
+                    println!("internal error --> {:}", msg);
                 }
             }
-            rexiv2::Rexiv2Error::Internal(None) => println!("yikes"),
+            _ => println!("internal error --> yikes"),
         },
     };
-    Ok(exif)
+    Ok(String::from(exif.trim_end()))
 }
 fn process_target(target: String) -> Result<bool, std::io::Error> {
     let path = Path::new(&target);
@@ -60,7 +61,7 @@ fn process_target(target: String) -> Result<bool, std::io::Error> {
             if let Ok(entry_path) = entry {
                 if entry_path.path().is_file() {
                     let file_result = process_file(entry_path.path().to_str().unwrap());
-                    println!("{:#?}", file_result.expect("could not process file"));
+                    println!("{:}", file_result.expect("could not process file"));
                 }
             }
         }
@@ -68,7 +69,7 @@ fn process_target(target: String) -> Result<bool, std::io::Error> {
 
     if path.is_file() {
         let file_result = process_file(path.to_str().unwrap());
-        println!("{:#?}", file_result.expect("could not process file"));
+        println!("{:}", file_result.expect("could not process file"));
     }
     Ok(true)
 }
