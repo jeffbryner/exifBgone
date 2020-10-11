@@ -24,10 +24,10 @@ fn process_file(filename: &str) -> Result<String, std::io::Error> {
     exif.push_str(": ");
     match Metadata::new_from_path(filename.clone()) {
         Ok(exif_metadata) => {
-            if exif_metadata.has_exif() {
+            if exif_metadata.supports_exif() && exif_metadata.has_exif() {
                 exif.push_str("EXIF ");
             }
-            if exif_metadata.has_iptc() {
+            if exif_metadata.supports_iptc() && exif_metadata.has_iptc() {
                 exif.push_str("IPTC ");
             }
             match exif_metadata.get_gps_info() {
@@ -35,7 +35,18 @@ fn process_file(filename: &str) -> Result<String, std::io::Error> {
                 None => {}
             };
         }
-        Err(exif_error) => println!("{:?}", exif_error),
+        Err(exif_error) => match exif_error {
+            rexiv2::Rexiv2Error::NoValue => println!("No value found"),
+            rexiv2::Rexiv2Error::Utf8(ref err) => println!("IO error: {:}", err),
+            rexiv2::Rexiv2Error::Internal(Some(ref msg)) => {
+                if msg.contains("The file contains data of an unknown image type") {
+                    {}
+                } else {
+                    println!("internal--> {:}", msg);
+                }
+            }
+            rexiv2::Rexiv2Error::Internal(None) => println!("yikes"),
+        },
     };
     Ok(exif)
 }
