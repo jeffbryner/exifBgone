@@ -35,15 +35,11 @@ fn process_file(filename: &str) -> Result<String, std::io::Error> {
                 None => {}
             };
         }
-        Err(_) => exif.push_str("error retrieving metadata"),
+        Err(exif_error) => println!("{:?}", exif_error),
     };
     Ok(exif)
 }
 fn process_target(target: String) -> Result<bool, std::io::Error> {
-    // default
-    let mut exif = String::from("");
-    exif.push_str(&target);
-    exif.push_str(": ");
     let path = Path::new(&target);
     if path.is_dir() {
         for entry in fs::read_dir(path)? {
@@ -51,7 +47,6 @@ fn process_target(target: String) -> Result<bool, std::io::Error> {
             // let athing = entry.path();
             // println!("{:?}", athing);
             if let Ok(entry_path) = entry {
-                println!("{:#?}", entry_path.path());
                 if entry_path.path().is_file() {
                     let file_result = process_file(entry_path.path().to_str().unwrap());
                     println!("{:#?}", file_result.expect("could not process file"));
