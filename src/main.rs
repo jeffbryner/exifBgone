@@ -39,7 +39,7 @@ fn process_file(filename: &str) -> Result<String, std::io::Error> {
     };
     Ok(exif)
 }
-fn process_target(target: String) -> Result<String, std::io::Error> {
+fn process_target(target: String) -> Result<bool, std::io::Error> {
     // default
     let mut exif = String::from("");
     exif.push_str(&target);
@@ -52,24 +52,24 @@ fn process_target(target: String) -> Result<String, std::io::Error> {
             // println!("{:?}", athing);
             if let Ok(entry_path) = entry {
                 println!("{:#?}", entry_path.path());
+                if entry_path.path().is_file() {
+                    let file_result = process_file(entry_path.path().to_str().unwrap());
+                    println!("{:#?}", file_result.expect("could not process file"));
+                }
             }
         }
     }
 
     if path.is_file() {
         let file_result = process_file(path.to_str().unwrap());
-        println!("{:#?}", file_result);
+        println!("{:#?}", file_result.expect("could not process file"));
     }
-    Ok(exif)
+    Ok(true)
 }
 
 fn main() {
     println!("exifBgone: ridding the world of exif tags, one file at a time.");
     let target = get_target();
     println!("targeting: {}", target);
-    let s_result = process_target(target);
-    println!(
-        "result: {:#?}",
-        s_result.expect("could not retrieve exif data")
-    );
+    let _ = process_target(target);
 }
